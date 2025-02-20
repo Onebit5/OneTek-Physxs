@@ -28,11 +28,28 @@ int main() {
     m3c.print();
 
     // Test matrix4
-    Matrix4 m4a;
-    Matrix4 m4b;
-    Matrix4 m4c = m4a * m4b;
-	std::cout << "Matrix4 multiplication: ";
-    m4c.print();
+    Matrix4 mat;
+	mat.data[0][0] = 2; mat.data[0][1] = 0; mat.data[0][2] = 0; mat.data[0][3] = 1;
+	mat.data[1][0] = 0; mat.data[1][1] = 2; mat.data[1][2] = 0; mat.data[1][3] = 2;
+	mat.data[2][0] = 0; mat.data[2][1] = 0; mat.data[2][2] = 2; mat.data[2][3] = 3;
+	mat.data[3][0] = 0; mat.data[3][1] = 0; mat.data[3][2] = 0; mat.data[3][3] = 1;
+
+	std::cout << "Original matrix: " << std::endl;
+	mat.print();
+
+	// Compute the determinant
+	float det = mat.determinant();
+	std::cout << "Determinant: " << det << std::endl;
+
+	// Compute the inverse
+	Matrix4 inv = mat.inverse();
+	std::cout << "Inverse matrix: " << std::endl;
+	inv.print();
+
+	// Verify inverse by multiplying with original matrix
+	Matrix4 identity = mat * inv;
+	std::cout << "Identity matrix: " << std::endl;
+	identity.print();
 
     // Test transform
     Transform transform;

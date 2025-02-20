@@ -6,7 +6,7 @@
 class Matrix3
 {
 public:
-	float data[3][3];
+	float data[3][3]; // 2D array to hold the elements of a 3x3 matrix
 
 	// Constructor (identity matrix by default)
 	Matrix3();

@@ -6,7 +6,7 @@
 class Matrix4
 {
 public:
-	float data[4][4];
+	float data[4][4]; // 2D array to hold the elements of a 4x4 matrix
 
 	// Constructor (identity matrix by default)
 	Matrix4();
@@ -23,6 +23,12 @@ public:
 	// Utility
 	void print() const;
 
+	// Helper function to compute the determinant of a 3x3 submatrix
+	static float determinant3x3(
+		float a, float b, float c,
+		float d, float e, float f,
+		float g, float h, float i
+	);
 };
 
 #endif

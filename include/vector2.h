@@ -7,7 +7,7 @@
 class Vector2
 {
 public:
-	float x, y;
+	float x, y; // Public member variables to store the x and y coordinates of the vector
 
 	// Constructors
 	Vector2(float x = 0, float y = 0);

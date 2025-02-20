@@ -6,7 +6,7 @@
 
 class Vector3 {
 public:
-	float x, y, z;
+	float x, y, z; // Public member variables to store the x, y and z coordinates of the vector
 
 	// Constructors
 	Vector3(float x = 0, float y = 0, float z = 0);

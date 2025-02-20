@@ -6,9 +6,9 @@
 
 class Transform {
 public:
-	Vector3 position;
-	Vector3 rotation; // Euler angles in degrees
-	Vector3 scale;
+	Vector3 position; // Position of the object in 3D space
+	Vector3 rotation; // Rotation of the object represented as Euler angles in degrees
+	Vector3 scale;    // Scale factors for the object in 3D space
 
 	// Constructor
 	Transform();
