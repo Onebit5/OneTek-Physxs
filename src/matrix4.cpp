@@ -23,6 +23,13 @@ Matrix4 Matrix4::operator*(const Matrix4& other) const {
 	return result; // Return the resulting matrix
 }
 
+Vector3 Matrix4::operator*(const Vector3& vec) const {
+	float x = data[0][0] * vec.x + data[0][1] * vec.y + data[0][2] * vec.z + data[0][3];
+	float y = data[1][0] * vec.x + data[1][1] * vec.y + data[1][2] * vec.z + data[1][3];
+	float z = data[2][0] * vec.x + data[2][1] * vec.y + data[2][2] * vec.z + data[2][3];
+	return Vector3(x, y, z);
+}
+
 // Helper function to compute the determinant of a 3x3 submatrix
 float Matrix4::determinant3x3(
 	float a, float b, float c,

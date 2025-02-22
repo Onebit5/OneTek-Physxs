@@ -1,68 +1,183 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include "include/vector2.h"
 #include "include/vector3.h"
 #include "include/matrix3.h"
 #include "include/matrix4.h"
 #include "include/transform.h"
 
+#define UNICODE
+#define _UNICODE
+
+// Window dimensions
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 600;
+
+// Function to read shader files
+std::string ReadShaderFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open shader file: " << filePath << std::endl;
+        return "";
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
+
+// Function to compile shaders
+unsigned int CompileShader(unsigned int type, const std::string& source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &src, nullptr);
+    glCompileShader(id);
+
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE) {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        char* message = (char*)alloca(length * sizeof(char));
+        glGetShaderInfoLog(id, length, &length, message);
+        std::cerr << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader: " << message << std::endl;
+        glDeleteShader(id);
+        return 0;
+    }
+
+    return id;
+}
+
+// Function to create shader program
+unsigned int CreateShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glValidateProgram(program);
+
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+
+    return program;
+}
+
 int main() {
-    // Test vector2
-    Vector2 v2a(1, 2);
-    Vector2 v2b(3, 4);
-    Vector2 v2c = v2a + v2b;
-	std::cout << "Vector2 addition: ";
-    v2c.print();
+    // Initialize GLFW
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return -1;
+    }
 
-    // Test vector3
-    Vector3 v3a(1, 2, 3);
-    Vector3 v3b(4, 5, 6);
-	std::cout << "Vector3 cross product: ";
-	Vector3 v3c = v3a.cross(v3b);
-    v3c.print();
+    // Create a window
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OneTek Physxs", NULL, NULL);
+    if (!window) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
 
-    // Test matrix3
-    Matrix3 m3a;
-    Matrix3 m3b;
-    Matrix3 m3c = m3a * m3b;
-	std::cout << "Matrix3 multiplication: ";
-    m3c.print();
+    // Initialize GLEW
+    if (glewInit() != GLEW_OK) {
+        std::cerr << "Failed to initialize GLEW" << std::endl;
+        return -1;
+    }
 
-    // Test matrix4
-    Matrix4 mat;
-	mat.data[0][0] = 2; mat.data[0][1] = 0; mat.data[0][2] = 0; mat.data[0][3] = 1;
-	mat.data[1][0] = 0; mat.data[1][1] = 2; mat.data[1][2] = 0; mat.data[1][3] = 2;
-	mat.data[2][0] = 0; mat.data[2][1] = 0; mat.data[2][2] = 2; mat.data[2][3] = 3;
-	mat.data[3][0] = 0; mat.data[3][1] = 0; mat.data[3][2] = 0; mat.data[3][3] = 1;
+    // Read shader files
+    std::string vertexShaderSource = ReadShaderFile("shaders/vertex.glsl");
+    std::string fragmentShaderSource = ReadShaderFile("shaders/fragment.glsl");
 
-	std::cout << "Original matrix: " << std::endl;
-	mat.print();
+    // Create shader program
+    unsigned int shaderProgram = CreateShaderProgram(vertexShaderSource, fragmentShaderSource);
+    glUseProgram(shaderProgram);
 
-	// Compute the determinant
-	float det = mat.determinant();
-	std::cout << "Determinant: " << det << std::endl;
+    // Define cube vertices
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f
+    };
 
-	// Compute the inverse
-	Matrix4 inv = mat.inverse();
-	std::cout << "Inverse matrix: " << std::endl;
-	inv.print();
+    // Define cube indices
+    unsigned int indices[] = {
+        0, 1, 2, 2, 3, 0, // Front face
+        4, 5, 6, 6, 7, 4, // Back face
+        0, 1, 5, 5, 4, 0, // Bottom face
+        2, 3, 7, 7, 6, 2, // Top face
+        0, 3, 7, 7, 4, 0, // Left face
+        1, 2, 6, 6, 5, 1  // Right face
+    };
 
-	// Verify inverse by multiplying with original matrix
-	Matrix4 identity = mat * inv;
-	std::cout << "Identity matrix: " << std::endl;
-	identity.print();
+    // Create vertex buffer and index buffer
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
-    // Test transform
-    Transform transform;
-    transform.position = Vector3(1, 2, 3);
-    transform.rotation = Vector3(45, 0, 0);
-    transform.scale = Vector3(1, 1, 1);
-	std::cout << "Transformation matrix: ";
-    Matrix4 transformMatrix = transform.getMatrix();
-    transformMatrix.print();
+    glBindVertexArray(VAO);
 
-    // Pause the console
-    std::cout << "Press any key to continue..." << std::endl;
-    std::cin.get();
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
+    // Main loop
+    while (!glfwWindowShouldClose(window)) {
+        // Clear the screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Use the shader program
+        glUseProgram(shaderProgram);
+
+        // Create transformation matrix
+        static float angle = 0.0f;
+        angle += 1.0f;
+        if (angle >= 360.0f) angle -= 360.0f;
+
+        Transform transform;
+        transform.rotation = Vector3(angle, angle, angle);
+        Matrix4 transformMatrix = transform.getMatrix3D();
+
+        // Pass the transformation matrix to the shader
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &transformMatrix.data[0][0]);
+
+        // Draw the cube
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+        // Swap buffers and poll events
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // Clean up
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteProgram(shaderProgram);
+
+    glfwTerminate();
     return 0;
 }

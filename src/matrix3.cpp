@@ -28,6 +28,12 @@ Matrix3 Matrix3::operator*(const Matrix3& other) const {
 	return result; // Return the resulting matrix
 }
 
+Vector2 Matrix3::operator*(const Vector2& vec) const {
+	float x = data[0][0] * vec.x + data[0][1] * vec.y + data[0][2];
+	float y = data[1][0] * vec.x + data[1][1] * vec.y + data[1][2];
+	return Vector2(x, y);
+}
+
 // Determinant
 float Matrix3::determinant() const {
 	// Calculate the determinant using the formula for a 3x3 matrix

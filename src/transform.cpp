@@ -1,83 +1,104 @@
-## Code Commented
-
-```cpp
 #include <cmath>
-#include <iostream>
-#include "../include/transform.h"
+#include "Transform.h"
+#define M_PI 3.14159265358979323846
 
-// Constructor initializes position, rotation, and scale
+// Constructor
 Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
 
-// Transformation matrix
-Matrix4 Transform::getMatrix() const {
-	Matrix4 translation;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			translation.data[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize identity matrix
-		}
-	}
-	translation.data[0][3] = position.x; // Set translation in x-axis
-	translation.data[1][3] = position.y; // Set translation in y-axis
-	translation.data[2][3] = position.z; // Set translation in z-axis
+// Transformation matrix for 3D
+Matrix4 Transform::getMatrix3D() const {
+    return translation3D(position) * rotation3D(rotation.x, rotation.y, rotation.z) * scaling3D(scale);
+}
 
-	// Convert rotation angles to radians
-	constexpr float M_PI_F = 3.14159265358979323846f;
-	float radX = rotation.x * M_PI_F / 180.0f; // Convert x rotation to radians
-	float radY = rotation.y * M_PI_F / 180.0f; // Convert y rotation to radians
-	float radZ = rotation.z * M_PI_F / 180.0f; // Convert z rotation to radians
+// Transformation matrix for 2D
+Matrix3 Transform::getMatrix2D() const {
+    return translation2D(position.x, position.y) * rotation2D(rotation.z) * scaling2D(scale.x, scale.y);
+}
 
-	Matrix4 rotationX;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			rotationX.data[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize identity matrix
-		}
-	}
-	rotationX.data[1][1] = cosf(radX);	// Set rotation around x-axis
-	rotationX.data[1][2] = -sinf(radX); // Set rotation around x-axis
-	rotationX.data[2][1] = sinf(radX);	// Set rotation around x-axis
-	rotationX.data[2][2] = cosf(radX);	// Set rotation around x-axis
+// Static transformation functions for 2D
+Matrix3 Transform::translation2D(float tx, float ty) {
+    Matrix3 mat;
+    mat.data[0][2] = tx;
+    mat.data[1][2] = ty;
+    return mat;
+}
 
-	Matrix4 rotationY;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			rotationY.data[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize identity matrix
-		}
-	}
-	rotationY.data[0][0] = cosf(radY);	// Set rotation around y-axis
-	rotationY.data[0][2] = sinf(radY);	// Set rotation around y-axis
-	rotationY.data[2][0] = -sinf(radY); // Set rotation around y-axis
-	rotationY.data[2][2] = cosf(radY);	// Set rotation around y-axis
+Matrix3 Transform::rotation2D(float angle) {
+    float rad = angle * static_cast<float>(M_PI) / 180.0f;
+    float cosA = cosf(rad);
+    float sinA = sinf(rad);
 
-	Matrix4 rotationZ;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			rotationZ.data[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize identity matrix
-		}
-	}
-	rotationZ.data[0][0] = cosf(radZ);	// Set rotation around z-axis
-	rotationZ.data[0][1] = -sinf(radZ); // Set rotation around z-axis
-	rotationZ.data[1][0] = sinf(radZ);	// Set rotation around z-axis
-	rotationZ.data[1][1] = cosf(radZ);	// Set rotation around z-axis
+    Matrix3 mat;
+    mat.data[0][0] = cosA;
+    mat.data[0][1] = -sinA;
+    mat.data[1][0] = sinA;
+    mat.data[1][1] = cosA;
+    return mat;
+}
 
-	Matrix4 scaling;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			scaling.data[i][j] = (i == j) ? 1.0f : 0.0f; // Initialize identity matrix
-		}
-	}
-	scaling.data[0][0] = scale.x; // Set scaling in x-axis
-	scaling.data[1][1] = scale.y; // Set scaling in y-axis
-	scaling.data[2][2] = scale.z; // Set scaling in z-axis
+Matrix3 Transform::scaling2D(float sx, float sy) {
+    Matrix3 mat;
+    mat.data[0][0] = sx;
+    mat.data[1][1] = sy;
+    return mat;
+}
 
-	return translation * rotationX * rotationY * rotationZ * scaling; // Return the combined transformation matrix
+// Static transformation functions for 3D
+Matrix4 Transform::translation3D(const Vector3& translation) {
+    Matrix4 mat;
+    mat.data[0][3] = translation.x;
+    mat.data[1][3] = translation.y;
+    mat.data[2][3] = translation.z;
+    return mat;
+}
+
+Matrix4 Transform::rotation3D(float angleX, float angleY, float angleZ) {
+    float radX = angleX * static_cast<float>(M_PI) / 180.0f;
+    float radY = angleY * static_cast<float>(M_PI) / 180.0f;
+    float radZ = angleZ * static_cast<float>(M_PI) / 180.0f;
+
+    float cosX = cosf(radX);
+    float sinX = sinf(radX);
+    float cosY = cosf(radY);
+    float sinY = sinf(radY);
+    float cosZ = cosf(radZ);
+    float sinZ = sinf(radZ);
+
+    Matrix4 rotX;
+    rotX.data[1][1] = cosX;
+    rotX.data[1][2] = -sinX;
+    rotX.data[2][1] = sinX;
+    rotX.data[2][2] = cosX;
+
+    Matrix4 rotY;
+    rotY.data[0][0] = cosY;
+    rotY.data[0][2] = sinY;
+    rotY.data[2][0] = -sinY;
+    rotY.data[2][2] = cosY;
+
+    Matrix4 rotZ;
+    rotZ.data[0][0] = cosZ;
+    rotZ.data[0][1] = -sinZ;
+    rotZ.data[1][0] = sinZ;
+    rotZ.data[1][1] = cosZ;
+
+    return rotZ * rotY * rotX;
+}
+
+Matrix4 Transform::scaling3D(const Vector3& scale) {
+    Matrix4 mat;
+    mat.data[0][0] = scale.x;
+    mat.data[1][1] = scale.y;
+    mat.data[2][2] = scale.z;
+    return mat;
 }
 
 // Print the transform
 void Transform::print() const {
-	std::cout << "Position: ";		// Output position
-	position.print();				// Print position details
-	std::cout << "Rotation: ";		// Output rotation
-	rotation.print();				// Print rotation details
-	std::cout << "Scale: ";			// Output scale
-	scale.print();					// Print scale details
+    std::cout << "Position: ";
+    position.print();
+    std::cout << "Rotation: ";
+    rotation.print();
+    std::cout << "Scale: ";
+    scale.print();
 }

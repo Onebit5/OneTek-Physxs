@@ -137,3 +137,9 @@ build/ZERO_CHECK.vcxproj
 build/ZERO_CHECK.vcxproj.filters
 *.vsidx
 .vs/OneTech-Physics/v17/DocumentLayout.backup.json
+*.filters
+*.recipe
+*.tlog
+*.pdb
+*.vcxproj
+*.ilk

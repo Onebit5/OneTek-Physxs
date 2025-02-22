@@ -2,6 +2,7 @@
 #define MATRIX4_H
 
 #include <iostream>
+#include "vector3.h"
 
 class Matrix4
 {
@@ -13,6 +14,8 @@ public:
 
 	// Matrix multiplication
 	Matrix4 operator*(const Matrix4& other) const;
+
+	Vector3 operator*(const Vector3& vec) const;
 
 	// Determinant
 	float determinant() const;
