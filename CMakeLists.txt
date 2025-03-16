@@ -25,6 +25,7 @@ add_executable(OneTechPhyxs
     src/matrix3.cpp
     src/matrix4.cpp
     src/transform.cpp
+    src/quaternion.cpp
 )
 
 # Link Libraries

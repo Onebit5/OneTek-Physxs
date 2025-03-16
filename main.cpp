@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 #include "include/vector2.h"
 #include "include/vector3.h"
 #include "include/matrix3.h"
@@ -142,21 +143,53 @@ int main() {
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
 
+    // Variables for time management
+    auto lastTime = std::chrono::high_resolution_clock::now();
+    float rotationSpeed = 90.0f; // Degrees per second
+    bool isPaused = false; // Pause state
+
+    // Main loop
     // Main loop
     while (!glfwWindowShouldClose(window)) {
+        // Calculate deltaTime
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+        lastTime = currentTime;
+
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Use the shader program
         glUseProgram(shaderProgram);
 
-        // Create transformation matrix
-        static float angle = 0.0f;
-        angle += 1.0f;
-        if (angle >= 360.0f) angle -= 360.0f;
+        // Handle user input for speed control
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+            rotationSpeed += 10.0f * deltaTime; // Increase speed
+        }
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            rotationSpeed -= 10.0f * deltaTime; // Decrease speed
+            if (rotationSpeed < 0.0f) rotationSpeed = 0.0f; // Prevent negative speed
+        }
 
+        // Handle pause/reset
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            isPaused = !isPaused; // Toggle pause
+            glfwWaitEventsTimeout(0.1); // Avoid rapid toggling
+        }
+        if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+            rotationSpeed = 90.0f; // Reset speed to default
+        }
+
+        // Update angle only if not paused
+        static float angle = 0.0f;
+        if (!isPaused) {
+            angle += rotationSpeed * deltaTime; // Update angle based on time
+            if (angle >= 360.0f) angle -= 360.0f;
+        }
+
+        // Create transformation matrix
         Transform transform;
-        transform.rotation = Vector3(angle, angle, angle);
+        transform.rotation = Quaternion::fromEulerAngles(angle, angle, angle);
         Matrix4 transformMatrix = transform.getMatrix3D();
 
         // Pass the transformation matrix to the shader

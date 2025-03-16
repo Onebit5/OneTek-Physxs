@@ -3,16 +3,17 @@
 #define M_PI 3.14159265358979323846
 
 // Constructor
-Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
+Transform::Transform() : position(0.0f, 0.0f, 0.0f), rotation(), scale(1.0f, 1.0f, 1.0f) {}
 
 // Transformation matrix for 3D
 Matrix4 Transform::getMatrix3D() const {
-    return translation3D(position) * rotation3D(rotation.x, rotation.y, rotation.z) * scaling3D(scale);
+    return translation3D(position) * rotation3D(rotation) * scaling3D(scale);
 }
 
 // Transformation matrix for 2D
 Matrix3 Transform::getMatrix2D() const {
-    return translation2D(position.x, position.y) * rotation2D(rotation.z) * scaling2D(scale.x, scale.y);
+    Vector3 euler = rotation.toEulerAngles();
+    return translation2D(position.x, position.y) * rotation2D(euler.z) * scaling2D(scale.x, scale.y);
 }
 
 // Static transformation functions for 2D
@@ -52,37 +53,8 @@ Matrix4 Transform::translation3D(const Vector3& translation) {
     return mat;
 }
 
-Matrix4 Transform::rotation3D(float angleX, float angleY, float angleZ) {
-    float radX = angleX * static_cast<float>(M_PI) / 180.0f;
-    float radY = angleY * static_cast<float>(M_PI) / 180.0f;
-    float radZ = angleZ * static_cast<float>(M_PI) / 180.0f;
-
-    float cosX = cosf(radX);
-    float sinX = sinf(radX);
-    float cosY = cosf(radY);
-    float sinY = sinf(radY);
-    float cosZ = cosf(radZ);
-    float sinZ = sinf(radZ);
-
-    Matrix4 rotX;
-    rotX.data[1][1] = cosX;
-    rotX.data[1][2] = -sinX;
-    rotX.data[2][1] = sinX;
-    rotX.data[2][2] = cosX;
-
-    Matrix4 rotY;
-    rotY.data[0][0] = cosY;
-    rotY.data[0][2] = sinY;
-    rotY.data[2][0] = -sinY;
-    rotY.data[2][2] = cosY;
-
-    Matrix4 rotZ;
-    rotZ.data[0][0] = cosZ;
-    rotZ.data[0][1] = -sinZ;
-    rotZ.data[1][0] = sinZ;
-    rotZ.data[1][1] = cosZ;
-
-    return rotZ * rotY * rotX;
+Matrix4 Transform::rotation3D(const Quaternion& rotation) {
+    return rotation.toMatrix();
 }
 
 Matrix4 Transform::scaling3D(const Vector3& scale) {
