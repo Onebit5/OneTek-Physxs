@@ -23,6 +23,18 @@ public:
 	// Inverse
 	Matrix3 inverse() const;
 
+	// Additional operator overloads
+	Matrix3& operator*=(const Matrix3& other);
+	Matrix3 operator+(const Matrix3& other) const;
+	Matrix3& operator+=(const Matrix3& other);
+	Matrix3 operator-(const Matrix3& other) const;
+	Matrix3& operator-=(const Matrix3& other);
+	Matrix3 operator*(float scalar) const;
+	Matrix3& operator*=(float scalar);
+
+	// Interpolation
+	static Matrix3 lerp(const Matrix3& a, const Matrix3& b, float t);
+
 	// Utility
 	void print() const;
 

@@ -25,6 +25,21 @@ public:
     static Quaternion fromAxisAngle(const Vector3& axis, float angle);
     static Quaternion fromEulerAngles(float pitch, float yaw, float roll);
 
+    // Additional operator overloads
+    Quaternion& operator*=(const Quaternion& other);
+    Quaternion operator+(const Quaternion& other) const;
+    Quaternion& operator+=(const Quaternion& other);
+    Quaternion operator-(const Quaternion& other) const;
+    Quaternion& operator-=(const Quaternion& other);
+    Quaternion operator*(float scalar) const;
+    Quaternion& operator*=(float scalar);
+    Quaternion operator/(float scalar) const;
+    Quaternion& operator/=(float scalar);
+
+    // Interpolation
+    static Quaternion lerp(const Quaternion& a, const Quaternion& b, float t);
+    static Quaternion slerp(const Quaternion& a, const Quaternion& b, float t);
+
     // Utility
     void print() const;
 };

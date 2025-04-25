@@ -20,6 +20,25 @@ public:
 	float magnitude() const;
 	Vector2 normalize() const;
 
+	// Additional operator overloads
+	Vector2& operator+=(const Vector2& other);
+	Vector2& operator-=(const Vector2& other);
+	Vector2& operator*=(float scalar);
+	Vector2& operator/=(float scalar);
+	Vector2 operator/(float scalar) const;
+
+	// Interpolation
+	static Vector2 lerp(const Vector2& a, const Vector2& b, float t);
+
+	// Reflection and projection
+	Vector2 reflect(const Vector2& normal) const;
+	Vector2 project(const Vector2& onto) const;
+
+	// Component-wise operations
+	static Vector2 min(const Vector2& a, const Vector2& b);
+	static Vector2 max(const Vector2& a, const Vector2& b);
+	static Vector2 clamp(const Vector2& value, const Vector2& min, const Vector2& max);
+
 	// Utility
 	void print() const;
 

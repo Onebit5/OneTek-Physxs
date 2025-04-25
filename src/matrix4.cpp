@@ -97,6 +97,83 @@ Matrix4 Matrix4::inverse() const {
 	return result; // Return the inverted matrix
 }
 
+// Additional operator overloads
+Matrix4& Matrix4::operator*=(const Matrix4& other) {
+    *this = *this * other;
+    return *this;
+}
+
+Matrix4 Matrix4::operator+(const Matrix4& other) const {
+    Matrix4 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result.data[i][j] = data[i][j] + other.data[i][j];
+        }
+    }
+    return result;
+}
+
+Matrix4& Matrix4::operator+=(const Matrix4& other) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            data[i][j] += other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+Matrix4 Matrix4::operator-(const Matrix4& other) const {
+    Matrix4 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result.data[i][j] = data[i][j] - other.data[i][j];
+        }
+    }
+    return result;
+}
+
+Matrix4& Matrix4::operator-=(const Matrix4& other) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            data[i][j] -= other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+Matrix4 Matrix4::operator*(float scalar) const {
+    Matrix4 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result.data[i][j] = data[i][j] * scalar;
+        }
+    }
+    return result;
+}
+
+Matrix4& Matrix4::operator*=(float scalar) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            data[i][j] *= scalar;
+        }
+    }
+    return *this;
+}
+
+// Interpolation
+Matrix4 Matrix4::lerp(const Matrix4& a, const Matrix4& b, float t) {
+    // Clamp t between 0 and 1
+    float clampedT = (t < 0) ? 0 : ((t > 1) ? 1 : t);
+    
+    Matrix4 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result.data[i][j] = a.data[i][j] * (1 - clampedT) + b.data[i][j] * clampedT;
+        }
+    }
+    return result;
+}
+
 // Print the matrix
 void Matrix4::print() const {
 	for (int i = 0; i < 4; i++) {

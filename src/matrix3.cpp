@@ -65,6 +65,83 @@ Matrix3 Matrix3::inverse() const {
 	return result; // Return the inverse matrix
 }
 
+// Additional operator overloads
+Matrix3& Matrix3::operator*=(const Matrix3& other) {
+    *this = *this * other;
+    return *this;
+}
+
+Matrix3 Matrix3::operator+(const Matrix3& other) const {
+    Matrix3 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result.data[i][j] = data[i][j] + other.data[i][j];
+        }
+    }
+    return result;
+}
+
+Matrix3& Matrix3::operator+=(const Matrix3& other) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            data[i][j] += other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+Matrix3 Matrix3::operator-(const Matrix3& other) const {
+    Matrix3 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result.data[i][j] = data[i][j] - other.data[i][j];
+        }
+    }
+    return result;
+}
+
+Matrix3& Matrix3::operator-=(const Matrix3& other) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            data[i][j] -= other.data[i][j];
+        }
+    }
+    return *this;
+}
+
+Matrix3 Matrix3::operator*(float scalar) const {
+    Matrix3 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result.data[i][j] = data[i][j] * scalar;
+        }
+    }
+    return result;
+}
+
+Matrix3& Matrix3::operator*=(float scalar) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            data[i][j] *= scalar;
+        }
+    }
+    return *this;
+}
+
+// Interpolation
+Matrix3 Matrix3::lerp(const Matrix3& a, const Matrix3& b, float t) {
+    // Clamp t between 0 and 1
+    float clampedT = (t < 0) ? 0 : ((t > 1) ? 1 : t);
+    
+    Matrix3 result;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            result.data[i][j] = a.data[i][j] * (1 - clampedT) + b.data[i][j] * clampedT;
+        }
+    }
+    return result;
+}
+
 // Print the matrix
 void Matrix3::print() const {
 	for (int i = 0; i < 3; i++) {
